@@ -532,3 +532,15 @@ procdump(void)
     cprintf("\n");
   }
 }
+
+int 
+ps() {
+  struct proc *p;
+
+  cprintf("PID\tNAME\n");
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+    if(p->state == RUNNING)
+      cprintf("%d\t%s\n", p->pid, p->name);
+
+  return 0;
+}
