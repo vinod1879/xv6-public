@@ -95,3 +95,15 @@ sys_ps(void)
 {
   return ps();
 }
+
+int 
+sys_clone(void)
+{
+  int stack,size;
+  if(argint(0, &stack) < 0)
+    return -1;
+  if(argint(1, &size) < 0)
+    return -1;
+  return clone((void*)stack, size);
+}
+

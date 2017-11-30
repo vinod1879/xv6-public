@@ -496,6 +496,54 @@ kill(int pid)
   return -1;
 }
 
+
+int
+clone(void* stack, int size)
+{
+
+  int i, pid;
+  struct proc *np;
+  struct proc *curproc = myproc();
+
+  if(curproc == '\0' || (uint) stack == 0)
+	return -1;
+
+  // Allocate process.
+  if((np = allocproc()) == 0)
+    return -1;
+
+  np->sz = curproc->sz;
+  np->pgdir = curproc->pgdir;
+  np->parent = curproc;
+  *np->tf = *curproc->tf;
+
+  // Clear %eax so that fork returns 0 in the child.
+  np->tf->eax = 0;
+
+  // change stack pointer
+  uint stack_size = *(uint*) curproc->tf->ebp - curproc->tf->esp;
+  uint ebp_start = *(uint *) curproc->tf->ebp - curproc->tf->ebp;
+
+  np->tf->esp = (uint) stack - stack_size;
+  np->tf->ebp = (uint) stack - ebp_start;
+
+  memmove((void *) np->tf->esp , (const void *) curproc->tf->esp, stack_size);
+
+
+  for(i = 0; i < NOFILE; i++)
+    if(curproc->ofile[i])
+      np->ofile[i] = filedup(curproc->ofile[i]);
+  np->cwd = idup(curproc->cwd);
+
+  pid = np->pid;
+
+  np->state = RUNNABLE;
+
+  safestrcpy(np->name, curproc->name, sizeof(curproc->name));
+
+  return pid;
+}
+
 //PAGEBREAK: 36
 // Print a process listing to console.  For debugging.
 // Runs when user types ^P on console.
