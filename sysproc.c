@@ -107,3 +107,14 @@ sys_clone(void)
   return clone((void*)stack, size);
 }
 
+int
+sys_join(void)
+{
+  return join();
+}
+
+int
+sys_gettid(void)
+{
+  return gettid();
+}

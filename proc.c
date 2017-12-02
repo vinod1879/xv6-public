@@ -511,7 +511,7 @@ clone(void* stack, int size)
   // Allocate process.
   if((np = allocproc()) == 0)
     return -1;
-
+  np->isthread = 1;
   np->sz = curproc->sz;
   np->pgdir = curproc->pgdir;
   np->parent = curproc;
@@ -591,4 +591,49 @@ ps() {
       cprintf("%d\t%s\n", p->pid, p->name);
 
   return 0;
+}
+
+int
+join(void) 
+{
+	struct proc *p;
+	int havekids,pid;
+	struct proc *curproc = myproc();
+
+	acquire(&ptable.lock);
+	for(;;) {
+		havekids = 0;
+
+		for(p=ptable.proc;p < &ptable.proc[NPROC];p++) {
+			if(p->parent != curproc || p->isthread != 1)
+				continue;
+
+			havekids = 1;
+			if(p->state == ZOMBIE) {
+				pid = p->pid;
+				kfree(p->kstack);
+				p->kstack = 0;
+				p->state = UNUSED;
+				p->pid = 0;
+				p->parent = 0;
+				p->name[0] = 0;
+				p->killed = 0;
+				release(&ptable.lock);
+				return pid;
+			}
+		}
+
+		if(!havekids || curproc->killed) {
+			release(&ptable.lock);
+			return -1;
+		}
+		sleep(curproc, &ptable.lock);
+	}
+}
+
+int
+gettid(void) 
+{
+	struct proc *curproc = myproc();
+	return curproc->pid;
 }
