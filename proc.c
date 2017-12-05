@@ -19,7 +19,6 @@ extern void forkret(void);
 extern void trapret(void);
 
 static void wakeup1(void *chan);
-int validate(struct proc *p1, struct proc *p2);
 
 void
 pinit(void)
@@ -602,39 +601,27 @@ clone(void* stack, int size)
   struct proc *np;
   struct proc *curproc = myproc();
 
-  if(curproc == '\0' || (uint) stack == 0)
-  return -1;
-
   // Allocate process.
   if((np = allocproc()) == 0)
     return -1;
 
-  cprintf("Cloned process: %d\n", np->pid);
   np->sz = curproc->sz;
   np->pgdir = curproc->pgdir;
-  np->parent = curproc;
+  np->parent = curproc->parent;
   *np->tf = *curproc->tf;
 
-  // Clear %eax so that fork returns 0 in the child.
+  // Clear %eax so that clone returns 0 in the child.
   np->tf->eax = 0;
 
-  uint offset = sizeof(stack) + sizeof(size);
-  offset = 0;
-  void *start_copy = (void*)curproc->tf->ebp + offset;
-  void *end_copy = (void*)curproc->tf->esp;
-  uint copy_size = (uint) (start_copy - end_copy);
+  // Setup Stack
 
-  np->tf->esp = (uint) (stack - copy_size);//Swap to our address space
-  np->tf->ebp = (uint) (stack - offset);
+  void *stack_top = stack + size - 4;
+  uint stack_size = (uint) curproc->tf->ebp - curproc->tf->esp;
 
-  cprintf("Copy Size: %d and offset: %d\n", copy_size, offset);
-  cprintf("Registers: BP: %x and SP: %x\n", np->tf->ebp, np->tf->esp);
+  np->tf->esp = (uint) stack_top - stack_size;
+  np->tf->ebp = (uint) stack_top;
 
-  memmove((void *) np->tf->esp , (void *) curproc->tf->esp, copy_size);
-
-  if(validate(np, curproc))
-    panic("Incorrect stack copy");
-
+  memmove((void *) np->tf->esp , (void *) curproc->tf->esp, stack_size);
 
   for(i = 0; i < NOFILE; i++)
     if(curproc->ofile[i])
@@ -643,25 +630,59 @@ clone(void* stack, int size)
 
   pid = np->pid;
 
+  safestrcpy(np->name, curproc->name, sizeof(curproc->name));
+  
+  acquire(&ptable.lock);
+
   np->state = RUNNABLE;
 
-  safestrcpy(np->name, curproc->name, sizeof(curproc->name));
+  release(&ptable.lock);
 
   return pid;
 }
 
-//Validate if child has the correct stack
 int
-validate(struct proc *p1, struct proc *p2) {
+clone2(void(*start_routine)(void), void *arg, void *stack)
+{
+  int i, pid;
+  struct proc *np;
+  struct proc *curproc = myproc();
 
-  if(!p1 || !p2)
+  // Allocate process.
+  if((np = allocproc()) == 0)
     return -1;
 
-  //Check same eip?
-  if(p1->tf->eip != p2->tf->eip) {
-    cprintf("p1->tf->eip %x, p2->tf->eip %x\n",
-           p1->tf->eip,  p2->tf->eip);
-    return -1;
-  }
-  return  0;
+  np->sz = curproc->sz;
+  np->pgdir = curproc->pgdir;
+  np->parent = curproc->parent;
+  *np->tf = *curproc->tf;
+
+  // Clear %eax so that clone returns 0 in the child.
+  np->tf->eax = 0;
+
+  // Setup Stack
+
+  void *stack_top = stack + PGSIZE;
+  *(uint*)(stack_top-4) = (uint) arg;
+  *(uint*)(stack_top-8) = 0xffffffff;
+
+  np->tf->esp = (uint) stack_top - 8;
+  np->tf->eip = (uint) start_routine;
+
+  for(i = 0; i < NOFILE; i++)
+    if(curproc->ofile[i])
+      np->ofile[i] = filedup(curproc->ofile[i]);
+  np->cwd = idup(curproc->cwd);
+
+  pid = np->pid;
+
+  safestrcpy(np->name, curproc->name, sizeof(curproc->name));
+  
+  acquire(&ptable.lock);
+
+  np->state = RUNNABLE;
+
+  release(&ptable.lock);
+
+  return pid;
 }

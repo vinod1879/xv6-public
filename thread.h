@@ -5,5 +5,6 @@
 int thread_create(void (*func)(void), void (*arg));
 int thread_id(void);
 void thread_exit(void);
+int thread_wait(void);
 
 #endif // THREAD_H

@@ -27,6 +27,7 @@ int ps(void);
 int clone(void *, int);
 int join(void);
 int gettid(void);
+int clone2(void(*func)(void), void*, void*);
 
 // ulib.c
 int stat(char*, struct stat*);

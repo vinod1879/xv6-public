@@ -106,6 +106,21 @@ sys_clone(void)
 }
 
 int
+sys_clone2(void)
+{
+  void *start_routine, *arg, *stack;
+  int ptrsz = sizeof(void*);
+
+  /** PARSE ARGUMENTS **/
+  if((argptr(0, (void*)&start_routine, ptrsz) < 0) || 
+     (argptr(1, (void*)&arg, ptrsz) < 0) ||
+     (argptr(2, (void*)&stack, ptrsz) < 0))
+    return -1;
+
+  return clone2(start_routine, arg, stack);
+}
+
+int
 sys_join(void)
 {
   return join();

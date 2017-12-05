@@ -124,6 +124,7 @@ int             ps(void);
 int             clone(void*, int);
 int             join(void);
 int             gettid(void);
+int             clone2(void(*start_routine)(void), void *stack, void *arg);
 
 // swtch.S
 void            swtch(struct context**, struct context*);

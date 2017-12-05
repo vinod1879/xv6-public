@@ -24,4 +24,4 @@
 #define SYS_clone  23
 #define SYS_join   24
 #define SYS_gettid 25
-
+#define SYS_clone2 26

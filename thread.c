@@ -5,18 +5,15 @@
 int thread_create(void (*func)(void), void (*arg))
 {
 	int tid;
-	void *stack = malloc(1024);
+	void *stack = malloc(4096);
   
-  	tid = clone(stack, 1024);
+  	tid = clone2(func, arg, stack);
 
-	if (tid == 0) {
-		func();
-		printf(1, "Freeing stack\n");
-    	free(stack);
-    	printf(1, "Exiting\n");
-    	exit();
-	}
 	return tid;
+}
+
+int thread_wait(void) {
+	return wait();
 }
 
 int thread_id(void)
