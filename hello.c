@@ -33,31 +33,47 @@
 // }
 
 
-void print_numbers();
+void print_numbers(int);
+void print_strings(char *str);
 
 int 
 main() {
 
-	int tid = 10,tid1 = 20;
+	int tid1, tid2, tid3;
+    int arg = 42;
+    int arg2 = 50;
+    char *arg3 = "H2G2";
 
+	tid1 = thread_create(&print_numbers, (void*)arg);
 
-	tid = thread_create(&print_numbers, 0);
-	printf(1, "Hello world: %d\n", tid);
-	tid1 = thread_create(&print_numbers, 0);
+    tid2 = thread_create(&print_numbers, (void*)arg2);
 
-	tid = thread_wait();
-	tid1 = thread_wait();
+    tid3 = thread_create(&print_strings, (void*)arg3);
 
-	printf(1, "%d %d", tid, tid1);
+	printf(1, "Hello world: %d\n", tid1);
+
+    printf(1, "Hello world: %d\n", tid2);
+
+    printf(1, "Hello world: %d\n", tid3);
+
+    tid1 = thread_wait();
+    tid2 = thread_wait();
+    tid3 = thread_wait();
 
 	exit();
 	return 0;
 }
 
 void 
-print_numbers(void) 
+print_numbers(int i) 
 {
-	int i = 42;
 	printf(1, "%d\n", i);
+    exit();
+}
+
+void 
+print_strings(char *str) 
+{
+    printf(1, "%s\n", str);
     exit();
 }

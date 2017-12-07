@@ -2,7 +2,7 @@
 #include "types.h"
 #include "thread.h"
 
-int thread_create(void (*func)(void), void (*arg))
+int thread_create(void (*func)(), void (*arg))
 {
 	int tid;
 	void *stack = malloc(4096);
@@ -13,7 +13,7 @@ int thread_create(void (*func)(void), void (*arg))
 }
 
 int thread_wait(void) {
-	return wait();
+	return join();
 }
 
 int thread_id(void)
@@ -23,13 +23,5 @@ int thread_id(void)
 
 void thread_exit(void)
 {
-	exit();
+	return;
 }
-
-/*void thread_int(struct lock_t lock) {
-	lock = 0;
-}
-
-void thread_acquire(struct lock_t lock) {
-
-}*/

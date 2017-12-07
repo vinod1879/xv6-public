@@ -659,19 +659,25 @@ clone2(void(*start_routine)(void), void *arg, void *stack)
 
   np->sz = curproc->sz;
   np->pgdir = curproc->pgdir;
-  np->parent = curproc->parent;
   *np->tf = *curproc->tf;
+
+  // Set appropriate parent
+  if (curproc->isthread)
+    np->parent = curproc->parent;
+  else
+    np->parent = curproc;
 
   // Clear %eax so that clone returns 0 in the child.
   np->tf->eax = 0;
 
   // Setup Stack
-
+  np->isthread = 1;
+  np->stack = stack;
   void *stack_top = stack + PGSIZE;
-  *(uint*)(stack_top-4) = (uint) arg;
+  
+  *(uint*)(stack_top-sizeof(void*)) = (uint) arg;
   *(uint*)(stack_top-8) = 0xffffffff;
-
-  np->tf->esp = (uint) stack_top - 8;
+  np->tf->esp = (uint) stack_top - 2*sizeof(void*);
   np->tf->eip = (uint) start_routine;
 
   for(i = 0; i < NOFILE; i++)
