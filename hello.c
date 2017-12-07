@@ -1,7 +1,7 @@
 #include "types.h"
 #include "stat.h"
 #include "user.h"
-#include "thread.c"
+#include "thread.h"
 
 // TEST CODE TAKEN FROM:
 // http://pages.cs.wisc.edu/~cs537-3/Projects/threads.c
@@ -67,6 +67,8 @@ main() {
 void 
 print_numbers(int i) 
 {
+    int me = thread_id();
+    printf(1, "Hello I am thread %d\n", me);
 	printf(1, "%d\n", i);
     exit();
 }

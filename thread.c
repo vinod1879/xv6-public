@@ -1,5 +1,6 @@
 
 #include "types.h"
+#include "user.h"
 #include "thread.h"
 
 int thread_create(void (*func)(), void (*arg))
@@ -18,10 +19,5 @@ int thread_wait(void) {
 
 int thread_id(void)
 {
-	return 0;
-}
-
-void thread_exit(void)
-{
-	return;
+	return gettid();
 }
