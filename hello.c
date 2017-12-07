@@ -38,12 +38,17 @@ void print_numbers();
 int 
 main() {
 
-	int tid = 10;
+	int tid = 10,tid1 = 20;
+
 
 	tid = thread_create(&print_numbers, 0);
 	printf(1, "Hello world: %d\n", tid);
+	tid1 = thread_create(&print_numbers, 0);
 
 	tid = thread_wait();
+	tid1 = thread_wait();
+
+	printf(1, "%d %d", tid, tid1);
 
 	exit();
 	return 0;

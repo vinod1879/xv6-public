@@ -23,5 +23,13 @@ int thread_id(void)
 
 void thread_exit(void)
 {
-	return;
+	exit();
 }
+
+/*void thread_int(struct lock_t lock) {
+	lock = 0;
+}
+
+void thread_acquire(struct lock_t lock) {
+
+}*/

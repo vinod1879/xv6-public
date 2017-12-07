@@ -263,6 +263,11 @@ exit(void)
 
   // Jump into the scheduler, never to return.
   curproc->state = ZOMBIE;
+
+  if(curproc->isthread) {
+	curproc->isthread = 0;
+	kfree(curproc->stack);
+  }
   sched();
   panic("zombie exit");
 }
