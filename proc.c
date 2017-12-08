@@ -263,11 +263,6 @@ exit(void)
 
   // Jump into the scheduler, never to return.
   curproc->state = ZOMBIE;
-
-  if(curproc->isthread) {
-	curproc->isthread = 0;
-	kfree(curproc->stack);
-  }
   sched();
   panic("zombie exit");
 }
@@ -553,7 +548,7 @@ ps() {
 }
 
 int
-join(void) 
+join(void **stack) 
 {
 	struct proc *p;
 	int havekids,pid;
@@ -572,12 +567,15 @@ join(void)
 				pid = p->pid;
 				kfree(p->kstack);
 				p->kstack = 0;
+        p->isthread = 0;
 				p->state = UNUSED;
 				p->pid = 0;
 				p->parent = 0;
 				p->name[0] = 0;
 				p->killed = 0;
-				release(&ptable.lock);
+        *stack = p->stack;
+
+        release(&ptable.lock);
 				return pid;
 			}
 		}

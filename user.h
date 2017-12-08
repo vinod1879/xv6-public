@@ -25,7 +25,7 @@ int sleep(int);
 int uptime(void);
 int ps(void);
 int clone(void *, int);
-int join(void);
+int join(void **stack);
 int gettid(void);
 int clone2(void(*func)(void), void*, void*);
 

@@ -122,7 +122,7 @@ void            wakeup(void*);
 void            yield(void);
 int             ps(void);
 int             clone(void*, int);
-int             join(void);
+int             join(void **stack);
 int             gettid(void);
 int             clone2(void(*start_routine)(void), void *stack, void *arg);
 

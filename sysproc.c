@@ -123,7 +123,11 @@ sys_clone2(void)
 int
 sys_join(void)
 {
-  return join();
+  void *stack;
+  if ((argptr(0, (void*)&stack, sizeof(void*))) < 0)
+    return -1;
+
+  return join(stack);
 }
 
 int
